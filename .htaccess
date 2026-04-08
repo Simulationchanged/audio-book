@@ -1,6 +1,6 @@
 AuthType Basic
 AuthName "Audiobook Reader"
-AuthUserFile /var/www/vhosts/REPLACE_WITH_YOUR_DOMAIN/.htpasswd
+AuthUserFile /var/www/vhosts/simulationchanged.com/.htpasswd
 Require valid-user
 
 # Block direct access to the password file
