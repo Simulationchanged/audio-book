@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audiobook Reader</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Library / Drop overlay -->
+<div class="drop-overlay visible" id="dropOverlay">
+  <div class="library-panel">
+    <div class="library-header">
+      <h2>Bibliothek</h2>
+      <button class="btn-icon" id="closeLibrary" title="Schließen">✕</button>
+    </div>
+
+    <div class="library-grid">
+      <div class="library-col">
+        <div class="library-col-title">📕 PDFs</div>
+        <div class="library-list" id="pdfList"></div>
+      </div>
+      <div class="library-col">
+        <div class="library-col-title">🎵 Audio</div>
+        <div class="library-list" id="audioList"></div>
+      </div>
+    </div>
+
+    <div class="library-col" style="margin-top:16px;">
+      <div class="library-col-title">🔖 Lesezeichen</div>
+      <div class="library-list" id="bookmarkList"></div>
+    </div>
+
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-zone-icon">＋</div>
+      <div class="drop-zone-title">Dateien hinzufügen</div>
+      <div class="drop-zone-sub">PDF und Audio hier reinziehen oder klicken</div>
+      <input type="file" id="fileInput" multiple accept=".pdf,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm,.mp4,.mkv,.mov" style="display:none">
+    </div>
+
+    <div class="library-actions">
+      <button class="start-btn" id="resumeBtn" style="display:none;">Letzte Sitzung fortsetzen</button>
+      <button class="start-btn" id="startBtn">Lesen starten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="book-icon">📖</div>
+    <div>
+      <div class="book-title" id="bookTitle">Audiobook Reader</div>
+      <div class="book-author" id="bookAuthor">Datei laden zum Starten</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn-icon" id="saveBookmark" title="Lesezeichen an aktueller Stelle speichern">🔖</button>
+    <button class="btn-icon" id="openLibrary" title="Bibliothek">📚</button>
+    <button class="btn-icon" id="toggleSidebar" title="Kapitel">☰</button>
+    <button class="btn-icon" id="toggleTheme" title="Design wechseln">◐</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">Seiten</div>
+    <div class="chapters" id="chapterList"></div>
+  </div>
+
+  <div class="reader-area">
+    <button class="nav-arrow prev" id="prevPage">‹</button>
+    <div class="page-container">
+      <div class="page" id="pageContent">
+        <h2>Willkommen</h2>
+        <p>Lade dein PDF und deine Audio-Datei, um zu beginnen. Du kannst die Dateien per Drag & Drop auf diese Seite ziehen oder auf die Schaltfläche klicken.</p>
+        <p>Die App zeigt den Text seitenweise an, während das Hörbuch im Hintergrund läuft. Du kannst frei blättern, die Wiedergabe steuern und die Geschwindigkeit anpassen.</p>
+      </div>
+    </div>
+    <button class="nav-arrow next" id="nextPage">›</button>
+    <div class="keyboard-hint">
+      <span><span class="kbd">←</span><span class="kbd">→</span> Blättern</span>
+      <span><span class="kbd">Space</span> Play/Pause</span>
+    </div>
+  </div>
+</div>
+
+<!-- Player Bar -->
+<div class="player-bar">
+  <div class="player-controls">
+    <button class="btn-player secondary" id="skipBack" title="-15s">⏪</button>
+    <button class="btn-player primary" id="playPause" title="Play/Pause">▶</button>
+    <button class="btn-player secondary" id="skipForward" title="+15s">⏩</button>
+  </div>
+  <div class="player-progress">
+    <span class="time-label" id="currentTime">0:00</span>
+    <div class="progress-track" id="progressTrack">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <span class="time-label right" id="totalTime">0:00</span>
+  </div>
+  <div class="player-volume">
+    <button class="btn-player secondary" id="volumeBtn">🔊</button>
+    <div class="volume-slider" id="volumeSlider">
+      <div class="volume-fill" id="volumeFill" style="width:80%"></div>
+    </div>
+  </div>
+  <select class="audio-select" id="audioSelect"></select>
+  <button class="speed-btn" id="speedBtn">1×</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
