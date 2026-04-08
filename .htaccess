@@ -1,0 +1,13 @@
+AuthType Basic
+AuthName "Audiobook Reader"
+AuthUserFile /var/www/vhosts/REPLACE_WITH_YOUR_DOMAIN/.htpasswd
+Require valid-user
+
+# Block direct access to the password file
+<Files ".htpasswd">
+    Require all denied
+</Files>
+
+<Files ".htaccess">
+    Require all denied
+</Files>
