@@ -457,8 +457,22 @@ async function renderPage(pdfIdx) {
   state.pageAspect = baseVp.width / baseVp.height;
   const dims2 = fitPageBox() || dims;
 
-  const dpr = window.devicePixelRatio || 1;
-  const scale = (dims2.w / baseVp.width) * dpr;
+  // Cap DPR — iOS Safari has hard canvas memory limits (~16MP on iPhone),
+  // higher DPR can silently produce blank canvases on large PDFs.
+  const rawDpr = window.devicePixelRatio || 1;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const dpr = Math.min(rawDpr, isIOS ? 2 : 3);
+  let scale = (dims2.w / baseVp.width) * dpr;
+  // Hard cap on total pixel area
+  const maxPixels = isIOS ? 16777216 : 33554432; // 16MP / 32MP
+  let pxW = baseVp.width * scale;
+  let pxH = baseVp.height * scale;
+  if (pxW * pxH > maxPixels) {
+    const k = Math.sqrt(maxPixels / (pxW * pxH));
+    scale *= k;
+  }
   const viewport = page.getViewport({ scale });
 
   const canvas = document.createElement('canvas');
@@ -614,15 +628,44 @@ document.addEventListener('keydown', e => {
   if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
 });
 
+// ─── Touch swipe for page navigation ───
+(() => {
+  const area = document.querySelector('.reader-area');
+  if (!area) return;
+  let startX = 0, startY = 0, startT = 0, tracking = false;
+  area.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { tracking = false; return; }
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY; startT = Date.now();
+    tracking = true;
+  }, { passive: true });
+  area.addEventListener('touchend', e => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const dt = Date.now() - startT;
+    if (dt > 600) return;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0) nextScreen(); else prevScreen();
+  }, { passive: true });
+})();
+
 // ─── Re-paginate on resize ───
 let resizeTimer;
-window.addEventListener('resize', () => {
+const handleResize = () => {
   if (!state.pdfLoaded) return;
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     renderPage(state.currentPage);
   }, 150);
-});
+};
+window.addEventListener('resize', handleResize);
+window.addEventListener('orientationchange', handleResize);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', handleResize);
+}
 
 // ─── Drag anywhere on page ───
 document.addEventListener('dragover', e => e.preventDefault());
